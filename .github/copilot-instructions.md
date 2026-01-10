@@ -315,7 +315,7 @@ src/
   changeHandlers.ts    - Helper utilities for field change operations
   errorHandlers.ts     - Error management and formatting utilities
   logFormEvents.ts     - Debug plugin for event logging
-  index.ts            - Public API exports
+  index.ts             - Public API exports
 ```
 
 ### Form.ts (Core Class)

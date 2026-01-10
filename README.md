@@ -40,8 +40,14 @@ const userSchema = z.object({
   email: z.string().email('Invalid email address')
 });
 
+// Infer Form values type
+type UserFormValues = z.infer<typeof schema>;
+
+// Define initial values
+const emptyUser: UserFormValues = { name: '', email: '' };
+
 // Create form hooks
-const { useForm, useSlice } = fieldwise({ name: '', email: '' })
+const { useForm, useSlice } = fieldwise(emptyUser)
   .use(validateZodSchema(userSchema))
   .hooks();
 
@@ -151,7 +157,7 @@ const builder = fieldwise({ name: '', email: '' });
 Applies a plugin to the form. Plugins can add validation, logging, or custom behavior.
 
 ```typescript
-builder.use(validateZodSchema(schema)).use(logFormEvents); // Chain multiple plugins
+builder.use(validateZodSchema(schema)).use(myEventHandler); // Chain multiple plugins
 ```
 
 ### `.hooks()`
@@ -168,7 +174,7 @@ Hook that subscribes to all form fields.
 
 **Returns:**
 
-- `fields: FieldSet<T>` - Object containing all fields with `{ value, error }`
+- `fields: FieldSet<T>` - Object containing all fields with `{ value, error, isTouched }`
 - `emit: EmitFn` - Function to trigger events
 - `once: OneTimeFn` - Function to listen to events once
 - `isTouched: boolean` - Whether any field has been modified
@@ -205,6 +211,7 @@ import { z } from 'zod';
 
 const schema = z
   .object({
+    email: z.email(),
     password: z.string().min(8, 'Must be at least 8 characters'),
     confirmPassword: z.string()
   })
@@ -212,10 +219,10 @@ const schema = z
     message: 'Passwords must match',
     path: ['confirmPassword']
   });
+type UserValues = z.infer<typeof schema>;
 
-const { useForm } = fieldwise({ password: '', confirmPassword: '' })
-  .use(validateZodSchema(schema))
-  .hooks();
+const emptyUser: UserValues = { email: '', password: '', confirmPassword: '' };
+const { useForm } = fieldwise(emptyUser).use(validateZodSchema(schema)).hooks();
 ```
 
 The validation plugin:
@@ -287,16 +294,19 @@ const asyncValidation = (form) => {
 
 ### Debug Mode
 
-Enable event logging during development:
+Enable debug logging by setting `Form.debugMode`:
 
 ```typescript
-import logFormEvents from 'fieldwise/logFormEvents';
+import { Form } from 'fieldwise';
 
-const { useForm } = fieldwise(initialValues)
-  .use(logFormEvents) // Logs all form events to console
-  .use(validateZodSchema(schema))
-  .hooks();
+// Log all events
+Form.debugMode = true;
+
+// Log only specific events
+Form.debugMode = { only: ['reset', 'validate', 'validated'] };
 ```
+
+Debug plugin is attached automatically when debug mode is enabled.
 
 ### Material-UI Integration
 
@@ -317,7 +327,7 @@ const TextFieldWrapper = ({ name, value, onChange, error }) => (
 );
 
 function MyForm() {
-  const { i } = useForm();
+  const { i } = useMyForm();
 
   return <TextFieldWrapper {...i('email')} />;
 }
