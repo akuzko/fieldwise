@@ -18,6 +18,9 @@
   ],
   "scripts": {
     "build": "tsc",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -34,9 +37,17 @@
     "zod": "^3.0.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.1",
     "@types/react": "^18.0.0",
+    "@vitest/coverage-v8": "^1.1.0",
+    "@vitest/ui": "^1.1.0",
+    "jsdom": "^23.0.1",
     "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "typescript": "^5.0.0",
+    "vitest": "^1.1.0",
     "zod": "^3.0.0"
   }
 }
