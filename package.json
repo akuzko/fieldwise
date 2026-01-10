@@ -1,0 +1,42 @@
+{
+  "name": "fieldwise",
+  "version": "0.1.0",
+  "description": "Type-safe, reactive form management for React with fine-grained field subscriptions",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "react",
+    "forms",
+    "validation",
+    "zod",
+    "typescript"
+  ],
+  "author": "Artem Kuzko <a.kuzko@gmail.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.0.0",
+    "zod": "^3.0.0"
+  }
+}
