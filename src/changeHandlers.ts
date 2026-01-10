@@ -9,6 +9,16 @@ export default function changeHandlers<T extends Values>(form: Form<T>) {
     form.setValues(newValues);
   });
 
+  form.on('touch', (name) => {
+    form.touch(name);
+  });
+
+  form.on('touchSome', (names) => {
+    names.forEach((name) => {
+      form.touch(name);
+    });
+  });
+
   form.on('reset', (values?) => {
     form.reset(values || form.initialValues);
   });

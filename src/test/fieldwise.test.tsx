@@ -172,6 +172,39 @@ describe('fieldwise', () => {
     });
   });
 
+  describe('touch events', () => {
+    it('should mark field as touched', async () => {
+      const { useForm } = fieldwise({ name: 'John' }).hooks();
+
+      const { result } = renderHook(() => useForm());
+
+      expect(result.current.fields.name.isTouched).toBe(false);
+
+      await act(async () => {
+        result.current.emit('touch', 'name');
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(result.current.fields.name.isTouched).toBe(true);
+      expect(result.current.fields.name.value).toBe('John');
+    });
+
+    it('should mark multiple fields as touched', async () => {
+      const { useForm } = fieldwise({ name: '', email: '', age: 0 }).hooks();
+
+      const { result } = renderHook(() => useForm());
+
+      await act(async () => {
+        result.current.emit('touchSome', ['name', 'email']);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(result.current.fields.name.isTouched).toBe(true);
+      expect(result.current.fields.email.isTouched).toBe(true);
+      expect(result.current.fields.age.isTouched).toBe(false);
+    });
+  });
+
   describe('emit.later', () => {
     it('should defer event to microtask', async () => {
       const { useForm } = fieldwise({ name: '' }).hooks();

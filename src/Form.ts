@@ -19,6 +19,8 @@ export type Errors<T extends Values> = Partial<Record<keyof T, string>>;
 export type EventMap<T extends Values> = {
   change: [key: keyof T, value: T[keyof T]];
   changeSome: [payload: Partial<T>];
+  touch: [key: keyof T];
+  touchSome: [keys: (keyof T)[]];
   reset: [snapshot?: T];
   errors: [errors: Errors<T>];
   validate: [];
@@ -90,6 +92,14 @@ export class Form<T extends Values> {
     (Object.keys(newValues) as (keyof T)[]).forEach((key) => {
       this.setValue(key, newValues[key] as T[keyof T]);
     });
+  }
+
+  touch<K extends keyof T>(key: K): void {
+    const field = this.fields[key];
+    if (!field.isTouched) {
+      field.isTouched = true;
+      this.notify(key, field);
+    }
   }
 
   setError<K extends keyof T>(key: K, error: string | null): void {

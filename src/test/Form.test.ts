@@ -93,6 +93,70 @@ describe('Form', () => {
     });
   });
 
+  describe('touch event', () => {
+    it('should mark field as touched without changing value', () => {
+      const builder = new FormBuilder({ name: 'John', email: '' });
+      const form = (builder as any).form;
+
+      expect(form.get('name').isTouched).toBe(false);
+      expect(form.getValue('name')).toBe('John');
+
+      form.emit('touch', 'name');
+
+      expect(form.get('name').isTouched).toBe(true);
+      expect(form.getValue('name')).toBe('John');
+    });
+
+    it('should notify field subscribers', () => {
+      const builder = new FormBuilder({ name: '' });
+      const form = (builder as any).form;
+      const subscriber = vi.fn();
+
+      form.subscribeField('name', subscriber);
+      form.emit('touch', 'name');
+
+      expect(subscriber).toHaveBeenCalled();
+    });
+
+    it('should not notify if already touched', () => {
+      const builder = new FormBuilder({ name: '' });
+      const form = (builder as any).form;
+      const subscriber = vi.fn();
+
+      form.emit('touch', 'name');
+      form.subscribeField('name', subscriber);
+      form.emit('touch', 'name');
+
+      expect(subscriber).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('touchSome event', () => {
+    it('should mark multiple fields as touched', () => {
+      const builder = new FormBuilder({ name: '', email: '', age: 0 });
+      const form = (builder as any).form;
+
+      form.emit('touchSome', ['name', 'email']);
+
+      expect(form.get('name').isTouched).toBe(true);
+      expect(form.get('email').isTouched).toBe(true);
+      expect(form.get('age').isTouched).toBe(false);
+    });
+
+    it('should not change field values', () => {
+      const builder = new FormBuilder({
+        name: 'John',
+        email: 'john@example.com'
+      });
+      const form = (builder as any).form;
+
+      form.emit('touchSome', ['name', 'email']);
+
+      expect(form.getValue('name')).toBe('John');
+      expect(form.getValue('email')).toBe('john@example.com');
+    });
+  });
+
   describe('reset event', () => {
     it('should reset to initial values', () => {
       const builder = new FormBuilder({

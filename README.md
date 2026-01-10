@@ -189,6 +189,8 @@ Available events:
 
 - `change` - Field value changed: `emit('change', key, value)`
 - `changeSome` - Multiple fields changed: `emit('changeSome', { field1: value1, field2: value2 })`
+- `touch` - Mark field as touched: `emit('touch', key)`
+- `touchSome` - Mark multiple fields as touched: `emit('touchSome', [key1, key2])`
 - `validate` - Validation requested: `emit('validate')`
 - `validated` - Validation completed: `once('validated', ({ values, errors }) => {})`
 - `reset` - Form reset: `emit('reset', snapshot?)`
