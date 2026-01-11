@@ -2,6 +2,13 @@
   "name": "fieldwise",
   "version": "0.1.0",
   "description": "Type-safe, reactive form management for React with fine-grained field subscriptions",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akuzko/fieldwise.git"
+  },
+  "bugs": {
+    "url": "https://github.com/akuzko/fieldwise/issues"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
