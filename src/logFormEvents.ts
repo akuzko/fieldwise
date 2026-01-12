@@ -3,7 +3,7 @@ import type { Values, Form, DebugMode, DebugModeConfig } from './Form';
 
 const allEventTypes = [
   'change',
-  'changeSome',
+  'changeMany',
   'reset',
   'errors',
   'validate',

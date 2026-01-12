@@ -70,12 +70,12 @@ describe('Form', () => {
     });
   });
 
-  describe('changeSome event', () => {
+  describe('changeMany event', () => {
     it('should update multiple fields at once', () => {
       const builder = new FormBuilder({ name: '', email: '', age: 0 });
       const form = (builder as any).form;
 
-      form.emit('changeSome', { name: 'Jane', email: 'jane@example.com' });
+      form.emit('changeMany', { name: 'Jane', email: 'jane@example.com' });
 
       expect(form.getValue('name')).toBe('Jane');
       expect(form.getValue('email')).toBe('jane@example.com');
@@ -86,7 +86,7 @@ describe('Form', () => {
       const builder = new FormBuilder({ name: '', email: '' });
       const form = (builder as any).form;
 
-      form.emit('changeSome', { name: 'Jane' });
+      form.emit('changeMany', { name: 'Jane' });
 
       expect(form.get('name').isTouched).toBe(true);
       expect(form.get('email').isTouched).toBe(false);
@@ -131,12 +131,12 @@ describe('Form', () => {
     });
   });
 
-  describe('touchSome event', () => {
+  describe('touchMany event', () => {
     it('should mark multiple fields as touched', () => {
       const builder = new FormBuilder({ name: '', email: '', age: 0 });
       const form = (builder as any).form;
 
-      form.emit('touchSome', ['name', 'email']);
+      form.emit('touchMany', ['name', 'email']);
 
       expect(form.get('name').isTouched).toBe(true);
       expect(form.get('email').isTouched).toBe(true);
@@ -150,7 +150,7 @@ describe('Form', () => {
       });
       const form = (builder as any).form;
 
-      form.emit('touchSome', ['name', 'email']);
+      form.emit('touchMany', ['name', 'email']);
 
       expect(form.getValue('name')).toBe('John');
       expect(form.getValue('email')).toBe('john@example.com');

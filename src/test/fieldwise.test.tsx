@@ -191,7 +191,7 @@ describe('fieldwise', () => {
       const { result } = renderHook(() => useForm());
 
       await act(async () => {
-        result.current.emit('touchSome', ['name', 'email']);
+        result.current.emit('touchMany', ['name', 'email']);
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
 

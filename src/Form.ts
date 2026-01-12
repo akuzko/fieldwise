@@ -18,9 +18,9 @@ export type Values = Record<string, unknown>;
 export type Errors<T extends Values> = Partial<Record<keyof T, string>>;
 export type EventMap<T extends Values> = {
   change: [key: keyof T, value: T[keyof T]];
-  changeSome: [payload: Partial<T>];
+  changeMany: [payload: Partial<T>];
   touch: [key: keyof T];
-  touchSome: [keys: (keyof T)[]];
+  touchMany: [keys: (keyof T)[]];
   reset: [snapshot?: T];
   errors: [errors: Errors<T>];
   validate: [];

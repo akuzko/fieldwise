@@ -5,7 +5,7 @@ export default function changeHandlers<T extends Values>(form: Form<T>) {
     form.setValue(name, value);
   });
 
-  form.on('changeSome', (newValues) => {
+  form.on('changeMany', (newValues) => {
     form.setValues(newValues);
   });
 
@@ -13,7 +13,7 @@ export default function changeHandlers<T extends Values>(form: Form<T>) {
     form.touch(name);
   });
 
-  form.on('touchSome', (names) => {
+  form.on('touchMany', (names) => {
     names.forEach((name) => {
       form.touch(name);
     });

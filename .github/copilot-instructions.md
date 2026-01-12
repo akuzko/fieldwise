@@ -11,7 +11,7 @@ Fieldwise is a **type-safe, reactive form management library for React** with fi
 The foundation is a custom `Form` class that manages state through an event system:
 
 - **Subscriptions**: Components subscribe to specific fields, not entire form state
-- **Events**: `change`, `changeSome`, `touch`, `touchSome`, `validate`, `validated`, `reset`
+- **Events**: `change`, `changeMany`, `touch`, `touchMany`, `validate`, `validated`, `reset`
 - **No React State**: All state lives in Form class, React only subscribes
 
 ### Fine-Grained Reactivity
@@ -30,9 +30,9 @@ form.subscribe(['name', 'email'], (values) => {
 ```typescript
 type EventMap<T> = {
   change: [key: keyof T, value: T[keyof T]];
-  changeSome: [partialValues: Partial<T>];
+  changeMany: [partialValues: Partial<T>];
   touch: [key: keyof T];
-  touchSome: [keys: (keyof T)[]];
+  touchMany: [keys: (keyof T)[]];
   validate: [];
   validated: [result: ValidationResult<T>];
   reset: [snapshot?: T];
@@ -170,13 +170,13 @@ if (isTouched) {
 emit('change', 'name', 'New Name');
 
 // Update multiple fields simultaneously
-emit('changeSome', { name: 'New Name', email: 'new@email.com' });
+emit('changeMany', { name: 'New Name', email: 'new@email.com' });
 
 // Mark field as touched without changing value
 emit('touch', 'name');
 
 // Mark multiple fields as touched
-emit('touchSome', ['name', 'email']);
+emit('touchMany', ['name', 'email']);
 
 // Reset form
 emit('reset'); // to initial values
@@ -283,7 +283,7 @@ type FieldSet<T> = {
 ```typescript
 type EventMap<T extends Values> = {
   change: [key: keyof T, value: T[keyof T]];
-  changeSome: [partialValues: Partial<T>];
+  changeMany: [partialValues: Partial<T>];
   validate: [];
   validated: [
     result: { values: T; errors: Record<keyof T, string | null> | null }
