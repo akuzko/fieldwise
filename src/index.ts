@@ -1,3 +1,3 @@
 export * from './fieldwise';
-export * from './validateZodSchema';
+export * from './zod';
 export * from './Form';

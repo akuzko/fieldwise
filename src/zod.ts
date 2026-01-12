@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { Form, Values, Errors } from './Form';
 
-export function validateZodSchema<T extends Values>(schema: z.ZodSchema<T>) {
+export function zod<T extends Values>(schema: z.ZodSchema<T>) {
   return function (form: Form<T>): void {
     form.on('validate', () => {
       const values = form.getValues();

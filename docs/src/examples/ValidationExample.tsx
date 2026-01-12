@@ -1,4 +1,4 @@
-import { fieldwise, validateZodSchema } from 'fieldwise';
+import { fieldwise, zod } from 'fieldwise';
 import { z } from 'zod';
 import { Input } from './components/Input';
 
@@ -20,7 +20,7 @@ const { useForm } = fieldwise({
   password: '',
   confirmPassword: ''
 })
-  .use(validateZodSchema(schema))
+  .use(zod(schema))
   .hooks();
 
 export default function ValidationExample() {

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { fieldwise } from '../fieldwise';
 import { z } from 'zod';
-import { validateZodSchema } from '../validateZodSchema';
+import { zod } from '../zod';
 
 describe('fieldwise', () => {
   describe('useForm hook', () => {
@@ -110,9 +110,7 @@ describe('fieldwise', () => {
       const schema = z.object({
         email: z.string().email('Invalid email')
       });
-      const { useForm } = fieldwise({ email: '' })
-        .use(validateZodSchema(schema))
-        .hooks();
+      const { useForm } = fieldwise({ email: '' }).use(zod(schema)).hooks();
       const { result } = renderHook(() => useForm());
 
       await act(async () => {
@@ -135,9 +133,7 @@ describe('fieldwise', () => {
       const schema = z.object({
         email: z.string().email('Invalid email')
       });
-      const { useForm } = fieldwise({ email: '' })
-        .use(validateZodSchema(schema))
-        .hooks();
+      const { useForm } = fieldwise({ email: '' }).use(zod(schema)).hooks();
       const { result } = renderHook(() => useForm());
 
       // First, validate with invalid email

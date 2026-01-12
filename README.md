@@ -31,12 +31,12 @@ pnpm add fieldwise zod
 **Peer dependencies:**
 
 - React 18+ or React 19+
-- Zod 3.x (optional, only if using validation)
+- Zod 3.x, 4.x (optional, only if using validation)
 
 ## Quick Start
 
 ```typescript
-import { fieldwise, validateZodSchema } from 'fieldwise';
+import { fieldwise, zod } from 'fieldwise';
 import { z } from 'zod';
 
 // Define your schema
@@ -45,15 +45,12 @@ const userSchema = z.object({
   email: z.string().email('Invalid email address')
 });
 
-// Infer Form values type
-type UserFormValues = z.infer<typeof schema>;
-
-// Define initial values
-const emptyUser: UserFormValues = { name: '', email: '' };
-
 // Create form hooks
-const { useForm, useSlice } = fieldwise(emptyUser)
-  .use(validateZodSchema(userSchema))
+const { useForm, useSlice } = fieldwise({
+  name: '',
+  email: ''
+})
+  .use(zod(userSchema))
   .hooks();
 
 // Export for use in components
@@ -63,17 +60,20 @@ export { useForm as useUserForm, useSlice as useUserSlice };
 ```typescript
 // In your component
 import { useUserForm } from './userForm';
+import Input from 'components/Input';
+// ^- Input is a simple custom wrapper that consumes 4 properties generated
+// by `i` function call: `name`, `value`, `onChange(value: <InferredType>) => void`
+// and `error`.
 
 function UserForm() {
-  const { fields, emit, once, i } = useUserForm();
+  const { emit, once, i } = useUserForm();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     emit.later('validate'); // Defer validation to microtask
-
     once('validated', ({ values, errors }) => {
-      if (errors) return; // Validation failed
+      if (errors) return emit('errors', errors); // Validation failed, assign input errors
 
       // Submit the form
       console.log('Submitting:', values);
@@ -82,11 +82,8 @@ function UserForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input {...i('name')} placeholder="Name" />
-      {fields.name.error && <span>{fields.name.error}</span>}
-
-      <input {...i('email')} type="email" placeholder="Email" />
-      {fields.email.error && <span>{fields.email.error}</span>}
+      <Input {...i('name')} placeholder="Name" />
+      <Input {...i('email')} type="email" placeholder="Email" />
 
       <button type="submit">Submit</button>
     </form>
@@ -162,7 +159,7 @@ const builder = fieldwise({ name: '', email: '' });
 Applies a plugin to the form. Plugins can add validation, logging, or custom behavior.
 
 ```typescript
-builder.use(validateZodSchema(schema)).use(myEventHandler); // Chain multiple plugins
+builder.use(zod(schema)).use(myEventHandler); // Chain multiple plugins
 ```
 
 ### `.hooks()`
@@ -211,7 +208,7 @@ Available events:
 ### Zod Schema Validation
 
 ```typescript
-import { validateZodSchema } from 'fieldwise';
+import { zod } from 'fieldwise';
 import { z } from 'zod';
 
 const schema = z
@@ -227,7 +224,7 @@ const schema = z
 type UserValues = z.infer<typeof schema>;
 
 const emptyUser: UserValues = { email: '', password: '', confirmPassword: '' };
-const { useForm } = fieldwise(emptyUser).use(validateZodSchema(schema)).hooks();
+const { useForm } = fieldwise(emptyUser).use(zod(schema)).hooks();
 ```
 
 The validation plugin:
@@ -315,7 +312,9 @@ Debug plugin is attached automatically when debug mode is enabled.
 
 ### Material-UI Integration
 
-**Note**: Material-UI inputs require custom wrappers since their API differs from standard HTML inputs. You'll need to create wrapper components that adapt the `i()` helper props to Material-UI's expected props.
+**Note**: Material-UI inputs require custom wrappers since their API slightly
+differs from fieldwise input interface. You'll need to create wrapper components
+that adapt the `i()` helper props to Material-UI's expected props.
 
 ```typescript
 import TextField from '@mui/material/TextField';
