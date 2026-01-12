@@ -1,5 +1,10 @@
 # Fieldwise
 
+[![npm version](https://img.shields.io/npm/v/fieldwise.svg)](https://www.npmjs.com/package/fieldwise)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/fieldwise)](https://bundlephobia.com/package/fieldwise)
+[![codecov](https://codecov.io/gh/akuzko/fieldwise/branch/main/graph/badge.svg)](https://codecov.io/gh/akuzko/fieldwise)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **Type-safe, reactive form management for React with fine-grained field subscriptions.**
 
 Fieldwise is a lightweight, event-driven form library that provides precise control over component re-renders through field-level subscriptions. No more unnecessary re-renders from unrelated field changes.
