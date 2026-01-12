@@ -1,5 +1,5 @@
+import { useRef, memo } from 'react';
 import { fieldwise } from 'fieldwise';
-import { useRef } from 'react';
 import { Input } from './components/Input';
 
 const { useForm, useSlice } = fieldwise({
@@ -61,6 +61,9 @@ function ContactFields() {
   );
 }
 
+const MemoizedNameFields = memo(NameFields);
+const MemoizedContactFields = memo(ContactFields);
+
 export default function SliceExample() {
   const { emit } = useForm();
 
@@ -74,8 +77,8 @@ export default function SliceExample() {
         </p>
       </div>
 
-      <NameFields />
-      <ContactFields />
+      <MemoizedNameFields />
+      <MemoizedContactFields />
 
       <button onClick={() => emit('reset')}>Reset Form</button>
     </div>
