@@ -41,26 +41,35 @@ export default function ValidationExample() {
     <div className="example">
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="username">Username</label>
-          <Input {...i('username')} id="username" placeholder="Username" />
+          <label htmlFor="validation-username">Username</label>
+          <Input
+            {...i('username')}
+            id="validation-username"
+            placeholder="Username"
+          />
           {fields.username.error && (
             <span className="error">{fields.username.error}</span>
           )}
         </div>
 
         <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <Input {...i('email')} id="email" type="email" placeholder="Email" />
+          <label htmlFor="validation-email">Email</label>
+          <Input
+            {...i('email')}
+            id="validation-email"
+            type="email"
+            placeholder="Email"
+          />
           {fields.email.error && (
             <span className="error">{fields.email.error}</span>
           )}
         </div>
 
         <div className="form-group">
-          <label htmlFor="password">Password</label>
+          <label htmlFor="validation-password">Password</label>
           <Input
             {...i('password')}
-            id="password"
+            id="validation-password"
             type="password"
             placeholder="Password"
           />
@@ -70,10 +79,10 @@ export default function ValidationExample() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password</label>
+          <label htmlFor="validation-confirmPassword">Confirm Password</label>
           <Input
             {...i('confirmPassword')}
-            id="confirmPassword"
+            id="validation-confirmPassword"
             type="password"
             placeholder="Confirm Password"
           />

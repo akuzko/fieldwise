@@ -1,4 +1,4 @@
-import { useRef, memo } from 'react';
+import { useRef } from 'react';
 import { fieldwise } from 'fieldwise';
 import { Input } from './components/Input';
 
@@ -11,12 +11,11 @@ const { useForm, useSlice } = fieldwise({
 
 function NameFields() {
   const { fields, i } = useSlice(['firstName', 'lastName']);
-  const rendersRef = useRef(0);
-  rendersRef.current++;
+  const rendersRef = useRef(1);
 
   return (
     <div className="slice-section">
-      <h4>Name Fields (Renders: {rendersRef.current})</h4>
+      <h4>Name Fields (Renders: {rendersRef.current++})</h4>
       <div className="form-group">
         <label>First Name</label>
         <Input {...i('firstName')} placeholder="First name" />
@@ -37,12 +36,11 @@ function NameFields() {
 
 function ContactFields() {
   const { fields, i } = useSlice(['email', 'phone']);
-  const rendersRef = useRef(0);
-  rendersRef.current++;
+  const rendersRef = useRef(1);
 
   return (
     <div className="slice-section">
-      <h4>Contact Fields (Renders: {rendersRef.current})</h4>
+      <h4>Contact Fields (Renders: {rendersRef.current++})</h4>
       <div className="form-group">
         <label>Email</label>
         <Input {...i('email')} placeholder="Email" />
@@ -61,12 +59,13 @@ function ContactFields() {
   );
 }
 
-const MemoizedNameFields = memo(NameFields);
-const MemoizedContactFields = memo(ContactFields);
-
-export default function SliceExample() {
+function ResetButton() {
   const { emit } = useForm();
 
+  return <button onClick={() => emit('reset')}>Reset Form</button>;
+}
+
+export default function SliceExample() {
   return (
     <div className="example">
       <div className="info-box">
@@ -77,10 +76,10 @@ export default function SliceExample() {
         </p>
       </div>
 
-      <MemoizedNameFields />
-      <MemoizedContactFields />
+      <NameFields />
+      <ContactFields />
 
-      <button onClick={() => emit('reset')}>Reset Form</button>
+      <ResetButton />
     </div>
   );
 }

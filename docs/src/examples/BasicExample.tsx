@@ -21,13 +21,17 @@ export default function BasicExample() {
     <div className="example">
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="name">Name</label>
-          <Input {...i('name')} id="name" placeholder="Enter your name" />
+          <label htmlFor="basic-name">Name</label>
+          <Input {...i('name')} id="basic-name" placeholder="Enter your name" />
         </div>
 
         <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <Input {...i('email')} id="email" placeholder="Enter your email" />
+          <label htmlFor="basic-email">Email</label>
+          <Input
+            {...i('email')}
+            id="basic-email"
+            placeholder="Enter your email"
+          />
         </div>
 
         <div className="button-group">
