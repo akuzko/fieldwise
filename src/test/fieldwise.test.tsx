@@ -14,12 +14,13 @@ describe('fieldwise', () => {
       expect(result.current.fields.email.value).toBe('');
     });
 
-    it('should update field value', () => {
+    it('should update field value', async () => {
       const { useForm } = fieldwise({ name: '' }).hooks();
       const { result } = renderHook(() => useForm());
 
-      act(() => {
+      await act(async () => {
         result.current.emit('change', 'name', 'John');
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
       expect(result.current.fields.name.value).toBe('John');
@@ -69,12 +70,13 @@ describe('fieldwise', () => {
       expect(result.current.fields).not.toHaveProperty('age');
     });
 
-    it('should update when subscribed field changes', () => {
+    it('should update when subscribed field changes', async () => {
       const { useSlice } = fieldwise({ name: '', email: '' }).hooks();
       const { result } = renderHook(() => useSlice(['name']));
 
-      act(() => {
+      await act(async () => {
         result.current.emit('change', 'name', 'John');
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
       expect(result.current.fields.name.value).toBe('John');
@@ -93,12 +95,13 @@ describe('fieldwise', () => {
       expect(typeof props.onChange).toBe('function');
     });
 
-    it('should update value through onChange', () => {
+    it('should update value through onChange', async () => {
       const { useForm } = fieldwise({ email: '' }).hooks();
       const { result } = renderHook(() => useForm());
 
-      act(() => {
+      await act(async () => {
         result.current.i('email').onChange('test@example.com');
+        await new Promise((resolve) => setTimeout(resolve, 0));
       });
 
       expect(result.current.fields.email.value).toBe('test@example.com');
@@ -214,7 +217,9 @@ describe('fieldwise', () => {
       expect(validationRan).toBe(false);
 
       // Wait for setTimeout to execute
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
 
       expect(validationRan).toBe(true);
     });

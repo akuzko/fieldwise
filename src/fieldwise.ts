@@ -56,6 +56,7 @@ export class FormBuilder<T extends Values> {
       useEffect(() => {
         const unsubscribers: FieldUnsubscribeFn[] = [];
         let pendingUpdate = false;
+        let pendingValidationUpdate = false;
 
         const scheduleUpdate = () => {
           if (!pendingUpdate) {
@@ -67,16 +68,26 @@ export class FormBuilder<T extends Values> {
           }
         };
 
+        const scheduleValidationUpdate = (isValidating: boolean) => {
+          if (!pendingValidationUpdate) {
+            pendingValidationUpdate = true;
+            queueMicrotask(() => {
+              pendingValidationUpdate = false;
+              setIsValidating(isValidating);
+            });
+          }
+        };
+
         keys.forEach((key) => {
           const unsubscribe = this.form.subscribeField(key, scheduleUpdate);
           unsubscribers.push(unsubscribe);
         });
 
         const unsubscribeValidationStart = this.form.on('validationStart', () =>
-          setIsValidating(true)
+          scheduleValidationUpdate(true)
         );
         const unsubscribeValidated = this.form.on('validated', () => {
-          setIsValidating(false);
+          scheduleValidationUpdate(false);
         });
 
         return () => {
