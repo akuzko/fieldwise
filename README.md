@@ -243,11 +243,15 @@ Create custom validators using `registerValidator`:
 
 ```typescript
 const customValidation = (form) => {
-  form.registerValidator(async (values) => {
-    // Your validation logic
-    const errors = await validateAsync(values);
+  form.registerValidator(async (values, syncErrors) => {
+    // syncErrors contains results from sync validators that ran before this
+    // Use it to skip expensive async operations
+    if (syncErrors && Object.keys(syncErrors).length > 0) {
+      return null; // Skip if there are already errors
+    }
 
-    // Return errors object or null
+    // Your async validation logic
+    const errors = await validateAsync(values);
     return errors;
   });
 };
@@ -285,10 +289,12 @@ fieldwise(initialValues)
 
 **Validation flow:**
 
-1. All sync validators run sequentially
-2. If any sync validator returns errors, async validators are skipped
-3. If no sync errors, all async validators run in parallel
-4. Results are merged and emitted via `validated` event
+1. Validators are partitioned by arity (`validator.length < 2` = pure, `>= 2` = error-dependent)
+2. All pure validators are called and results collected (mix of sync/async)
+3. Sync errors from pure validators are merged
+4. All error-dependent validators are called with merged errors
+5. All async results (from both groups) are awaited in parallel
+6. All results are merged and emitted via `validated` event
 
 ## Advanced Usage
 

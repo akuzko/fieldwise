@@ -265,17 +265,22 @@ Fieldwise uses a `registerValidator` API for all validation:
 **Validator Function Signature:**
 
 ```typescript
-type Validator<T> = (values: T) => Errors<T> | null | Promise<Errors<T> | null>;
+type Validator<T> = (
+  values: T,
+  syncErrors?: Errors<T>
+) => Errors<T> | null | Promise<Errors<T> | null>;
 ```
 
 **Validation Flow:**
 
 1. When `emit('validate')` is called, Form emits `validationStart`
-2. All sync validators run sequentially
-3. If sync validators return errors, async validators are skipped
-4. If no sync errors, all async validators run in parallel
-5. Results are merged and Form emits `validated` event
-6. Form sets `isValidating` to false
+2. Validators are partitioned by arity: `length < 2` = pure validators, `length >= 2` = error-dependent
+3. All pure validators are called with `(values)` only
+4. Sync errors from pure validators are collected
+5. All error-dependent validators are called with `(values, syncErrors)`
+6. All async results (from both groups) are awaited in parallel
+7. Results are merged and Form emits `validated` event
+8. Form sets `isValidating` to false
 
 **Example with multiple validators:**
 
@@ -288,8 +293,13 @@ const syncValidator = (form) => {
 };
 
 const asyncValidator = (form) => {
-  form.registerValidator(async (values) => {
-    // Async validation (only runs if sync passes)
+  form.registerValidator(async (values, syncErrors) => {
+    // Check syncErrors to skip expensive async validation
+    if (syncErrors && Object.keys(syncErrors).length > 0) {
+      return null;
+    }
+
+    // Async validation runs only if no sync errors
     const available = await checkAvailability(values.email);
     return available ? null : { email: 'Already taken' };
   });
@@ -298,7 +308,7 @@ const asyncValidator = (form) => {
 fieldwise(initial)
   .use(zod(schema)) // Sync validator 1
   .use(syncValidator) // Sync validator 2
-  .use(asyncValidator) // Async validator (skipped if sync errors)
+  .use(asyncValidator) // Async validator (checks syncErrors)
   .hooks();
 ```
 

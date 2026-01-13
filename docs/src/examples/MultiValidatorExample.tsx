@@ -16,18 +16,22 @@ const checkUsernameAvailability = async (
   return username !== 'admin' && username !== 'test';
 };
 
+// Custom async validator plugin
 const asyncUsernameValidator = (form: any) => {
-  form.registerValidator(async (values: { username: string }) => {
-    if (!values.username) return null;
+  form.registerValidator(
+    async (values: { username: string }, syncErrors?: any) => {
+      // Skip expensive server check if sync validation already failed
+      if (syncErrors?.username) return null;
 
-    const available = await checkUsernameAvailability(values.username);
+      const available = await checkUsernameAvailability(values.username);
 
-    if (!available) {
-      return { username: 'Username is already taken' };
+      if (!available) {
+        return { username: 'Username is already taken' };
+      }
+
+      return null;
     }
-
-    return null;
-  });
+  );
 };
 
 const { useForm } = fieldwise({
@@ -60,12 +64,15 @@ export default function MultiValidatorExample() {
         <br />
         1. <strong>Sync validator</strong>: Zod schema validation
         <br />
-        2. <strong>Async validator</strong>: Username availability check
+        2. <strong>Async validator</strong>: Username availability check (with
+        syncErrors check)
         <br />
         <br />
         Try usernames "admin" or "test" to see async validation in action.
         <br />
-        Note: Async validation only runs if sync validation passes!
+        <strong>Note:</strong> The async validator checks{' '}
+        <code>syncErrors</code> and skips the server request if sync validation
+        already failed!
       </p>
 
       <form onSubmit={handleSubmit}>

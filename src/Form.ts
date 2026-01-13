@@ -38,6 +38,11 @@ export type DebugModeConfig = {
   only: (keyof EventMap<Values>)[];
 };
 
+type Validator<T extends Values> = (
+  values: T,
+  syncErrors?: Errors<T>
+) => Errors<T> | null | Promise<Errors<T> | null>;
+
 export class Form<T extends Values> {
   public static debugMode: DebugMode = false;
   public initialValues: T;
@@ -45,9 +50,7 @@ export class Form<T extends Values> {
   private fields: FieldSet<T>;
   private fieldSubscribers: Map<keyof T, Set<FieldSubscriber<T[keyof T]>>> =
     new Map();
-  private validators: Array<
-    (values: T) => Errors<T> | null | Promise<Errors<T> | null>
-  > = [];
+  private validators: Validator<T>[] = [];
 
   private eventHandlers: Map<
     keyof EventMap<T>,
@@ -70,7 +73,10 @@ export class Form<T extends Values> {
   }
 
   registerValidator(
-    validator: (values: T) => Errors<T> | null | Promise<Errors<T> | null>
+    validator: (
+      values: T,
+      syncErrors?: Errors<T>
+    ) => Errors<T> | null | Promise<Errors<T> | null>
   ): void {
     this.validators.push(validator);
   }
@@ -275,37 +281,44 @@ export class Form<T extends Values> {
     this.emit('validationStart');
 
     const values = this.getValues();
-    const syncResults: Array<Errors<T> | null> = [];
-    const asyncValidators: Array<Promise<Errors<T> | null>> = [];
 
-    // Separate sync and async validators
-    for (const validator of this.validators) {
-      const result = validator(values);
+    // Partition validators by arity: pure validators vs error-dependent validators
+    const pureValidators = this.validators.filter((v) => v.length < 2);
+    const errorDependentValidators = this.validators.filter(
+      (v) => v.length >= 2
+    );
+
+    // Run pure validators first
+    const pureResults = pureValidators.map((validator) => validator(values));
+    const errors: Errors<T> = {};
+    const purePromises: Array<Promise<Errors<T> | null>> = [];
+
+    for (const result of pureResults) {
       if (result instanceof Promise) {
-        asyncValidators.push(result);
-      } else {
-        syncResults.push(result);
-      }
-    }
-
-    // Merge sync validation results
-    let errors: Errors<T> = {};
-    for (const result of syncResults) {
-      if (result) {
+        purePromises.push(result);
+      } else if (result) {
         Object.assign(errors, result);
       }
     }
 
-    // If sync validators found errors, skip async validators
-    if (Object.keys(errors).length > 0) {
-      this.isValidating = false;
-      this.emit('validated', values, errors);
-      return;
+    // Call error-dependent validators with current errors
+    const dependentResults = errorDependentValidators.map((validator) =>
+      validator(values, errors)
+    );
+    const dependentPromises: Array<Promise<Errors<T> | null>> = [];
+
+    for (const result of dependentResults) {
+      if (result instanceof Promise) {
+        dependentPromises.push(result);
+      } else if (result) {
+        Object.assign(errors, result);
+      }
     }
 
-    // Run async validators in parallel
-    if (asyncValidators.length > 0) {
-      const asyncResults = await Promise.all(asyncValidators);
+    // Wait for all async validators (both pure and error-dependent)
+    const allPromises = [...purePromises, ...dependentPromises];
+    if (allPromises.length > 0) {
+      const asyncResults = await Promise.all(allPromises);
       for (const result of asyncResults) {
         if (result) {
           Object.assign(errors, result);
