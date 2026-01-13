@@ -108,17 +108,15 @@ describe('fieldwise', () => {
   describe('validation', () => {
     it('should validate with Zod schema', async () => {
       const schema = z.object({
-        email: z.string().email('Invalid email')
+        email: z.email('Invalid email')
       });
       const { useForm } = fieldwise({ email: '' }).use(zod(schema)).hooks();
       const { result } = renderHook(() => useForm());
 
       await act(async () => {
-        let errors = null;
-        result.current.once('validated', ({ errors: validationErrors }) => {
-          errors = validationErrors;
-          if (validationErrors) {
-            result.current.emit('errors', validationErrors);
+        result.current.once('validated', (_values, errors) => {
+          if (errors) {
+            result.current.emit('errors', errors);
           }
         });
 
@@ -131,16 +129,16 @@ describe('fieldwise', () => {
 
     it('should clear errors on valid input', async () => {
       const schema = z.object({
-        email: z.string().email('Invalid email')
+        email: z.email('Invalid email')
       });
       const { useForm } = fieldwise({ email: '' }).use(zod(schema)).hooks();
       const { result } = renderHook(() => useForm());
 
       // First, validate with invalid email
       await act(async () => {
-        result.current.once('validated', ({ errors: validationErrors }) => {
-          if (validationErrors) {
-            result.current.emit('errors', validationErrors);
+        result.current.once('validated', (_values, errors) => {
+          if (errors) {
+            result.current.emit('errors', errors);
           }
         });
 
@@ -154,9 +152,9 @@ describe('fieldwise', () => {
       await act(async () => {
         result.current.emit('change', 'email', 'valid@example.com');
 
-        result.current.once('validated', ({ errors: validationErrors }) => {
-          if (validationErrors) {
-            result.current.emit('errors', validationErrors);
+        result.current.once('validated', (_values, errors) => {
+          if (errors) {
+            result.current.emit('errors', errors);
           }
         });
 

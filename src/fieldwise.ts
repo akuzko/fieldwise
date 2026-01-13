@@ -6,14 +6,15 @@ import errorHandlers from './errorHandlers';
 
 import type { Values, FieldSet, EmitFn, FieldUnsubscribeFn } from './Form';
 
-type EmitFnWithLater<T extends Values> = EmitFn<T> & {
+type EmitFnEnhanced<T extends Values> = EmitFn<T> & {
   later: EmitFn<T>;
 };
 
 type FormCommons<T extends Values> = {
-  emit: EmitFnWithLater<T>;
+  emit: EmitFnEnhanced<T>;
   once: typeof Form.prototype.once;
   isTouched: boolean;
+  isValidating: boolean;
   i: <K extends keyof T>(key: K) => InputProps<K, T[K]>;
 };
 
@@ -50,6 +51,7 @@ export class FormBuilder<T extends Values> {
   get useSlice(): FormHooks<T>['useSlice'] {
     return (keys) => {
       const [fields, setFields] = useState(() => this.form.getSlice(keys));
+      const [isValidating, setIsValidating] = useState(this.form.isValidating);
 
       useEffect(() => {
         const unsubscribers: FieldUnsubscribeFn[] = [];
@@ -70,12 +72,21 @@ export class FormBuilder<T extends Values> {
           unsubscribers.push(unsubscribe);
         });
 
+        const unsubscribeValidationStart = this.form.on('validationStart', () =>
+          setIsValidating(true)
+        );
+        const unsubscribeValidated = this.form.on('validated', () => {
+          setIsValidating(false);
+        });
+
         return () => {
           unsubscribers.forEach((unsubscribe) => unsubscribe());
+          unsubscribeValidationStart();
+          unsubscribeValidated();
         };
       }, [keys]);
 
-      const emit: EmitFnWithLater<T> = useMemo(() => {
+      const emit: EmitFnEnhanced<T> = useMemo(() => {
         const emitFn = this.form.emit.bind(this.form);
 
         return Object.assign(emitFn, {
@@ -101,7 +112,7 @@ export class FormBuilder<T extends Values> {
         []
       );
 
-      return { fields, isTouched, emit, once, i: inputProps };
+      return { fields, isTouched, isValidating, emit, once, i: inputProps };
     };
   }
 

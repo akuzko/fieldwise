@@ -24,13 +24,13 @@ const { useForm } = fieldwise({
   .hooks();
 
 export default function ValidationExample() {
-  const { fields, i, emit, once } = useForm();
+  const { fields, i, emit, once, isValidating } = useForm();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     emit.later('validate');
-    once('validated', ({ values, errors }) => {
+    once('validated', (values, errors) => {
       if (errors) return emit('errors', errors);
 
       alert(`Form valid! Username: ${values.username}`);
@@ -91,7 +91,9 @@ export default function ValidationExample() {
           )}
         </div>
 
-        <button type="submit">Submit</button>
+        <button type="submit" disabled={isValidating}>
+          {isValidating ? 'Validating...' : 'Submit'}
+        </button>
       </form>
     </div>
   );

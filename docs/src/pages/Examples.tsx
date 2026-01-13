@@ -1,6 +1,7 @@
 import BasicExample from '../examples/BasicExample';
-import ValidationExample from '../examples/ValidationExample';
 import SliceExample from '../examples/SliceExample';
+import ValidationExample from '../examples/ValidationExample';
+import MultiValidatorExample from '../examples/MultiValidatorExample';
 
 export default function Examples() {
   return (
@@ -28,6 +29,12 @@ export default function Examples() {
           Using <code>useSlice()</code> to subscribe to specific fields only.
         </p>
         <SliceExample />
+      </section>
+
+      <section className="example-section">
+        <h2>Multiple Validators</h2>
+        <p>Form with multiple validators applied to fields.</p>
+        <MultiValidatorExample />
       </section>
     </div>
   );

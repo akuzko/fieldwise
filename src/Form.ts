@@ -24,12 +24,8 @@ export type EventMap<T extends Values> = {
   reset: [snapshot?: T];
   errors: [errors: Errors<T>];
   validate: [];
-  validated: [
-    payload: {
-      values: T;
-      errors: Errors<T> | null;
-    }
-  ];
+  validated: [values: T, errors: Errors<T> | null];
+  validationStart: [];
 };
 
 export type EmitFn<T extends Values> = <K extends keyof EventMap<T>>(
@@ -45,9 +41,13 @@ export type DebugModeConfig = {
 export class Form<T extends Values> {
   public static debugMode: DebugMode = false;
   public initialValues: T;
+  public isValidating: boolean = false;
   private fields: FieldSet<T>;
   private fieldSubscribers: Map<keyof T, Set<FieldSubscriber<T[keyof T]>>> =
     new Map();
+  private validators: Array<
+    (values: T) => Errors<T> | null | Promise<Errors<T> | null>
+  > = [];
 
   private eventHandlers: Map<
     keyof EventMap<T>,
@@ -62,6 +62,17 @@ export class Form<T extends Values> {
   constructor(initialValues: T) {
     this.initialValues = initialValues;
     this.fields = this.valuesToFields(initialValues);
+
+    // Set up validation handler
+    this.on('validate', () => {
+      this.runValidation();
+    });
+  }
+
+  registerValidator(
+    validator: (values: T) => Errors<T> | null | Promise<Errors<T> | null>
+  ): void {
+    this.validators.push(validator);
   }
 
   getValue<K extends keyof T>(key: K): T[K] {
@@ -257,5 +268,56 @@ export class Form<T extends Values> {
       };
       return acc;
     }, {} as FieldSet<T>);
+  }
+
+  private async runValidation(): Promise<void> {
+    this.isValidating = true;
+    this.emit('validationStart');
+
+    const values = this.getValues();
+    const syncResults: Array<Errors<T> | null> = [];
+    const asyncValidators: Array<Promise<Errors<T> | null>> = [];
+
+    // Separate sync and async validators
+    for (const validator of this.validators) {
+      const result = validator(values);
+      if (result instanceof Promise) {
+        asyncValidators.push(result);
+      } else {
+        syncResults.push(result);
+      }
+    }
+
+    // Merge sync validation results
+    let errors: Errors<T> = {};
+    for (const result of syncResults) {
+      if (result) {
+        Object.assign(errors, result);
+      }
+    }
+
+    // If sync validators found errors, skip async validators
+    if (Object.keys(errors).length > 0) {
+      this.isValidating = false;
+      this.emit('validated', values, errors);
+      return;
+    }
+
+    // Run async validators in parallel
+    if (asyncValidators.length > 0) {
+      const asyncResults = await Promise.all(asyncValidators);
+      for (const result of asyncResults) {
+        if (result) {
+          Object.assign(errors, result);
+        }
+      }
+    }
+
+    this.isValidating = false;
+    this.emit(
+      'validated',
+      values,
+      Object.keys(errors).length > 0 ? errors : null
+    );
   }
 }
