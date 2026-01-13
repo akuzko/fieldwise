@@ -1,5 +1,6 @@
 import { fieldwise } from 'fieldwise';
 import { Input } from '~/components/Input';
+import { CodeBlock } from '~/components/CodeBlock';
 
 const { useForm } = fieldwise({ name: '', email: '' }).hooks();
 
@@ -52,6 +53,34 @@ export default function BasicExample() {
           )}
         </pre>
       </div>
+
+      <CodeBlock
+        title="Form Setup & Usage"
+        code={`// Create form with fieldwise builder
+const { useForm } = fieldwise({
+  name: '',
+  email: ''
+}).hooks();
+
+function BasicExample() {
+  // Get fields, input helper, and emit function
+  const { fields, i, emit } = useForm();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(\`Submitted: \${fields.name.value}, \${fields.email.value}\`);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <Input {...i('name')} placeholder="Enter your name" />
+      <Input {...i('email')} placeholder="Enter your email" />
+      <button type="submit">Submit</button>
+      <button type="button" onClick={() => emit('reset')}>Reset</button>
+    </form>
+  );
+}`}
+      />
     </div>
   );
 }

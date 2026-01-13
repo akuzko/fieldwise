@@ -10,6 +10,14 @@ export default function Examples() {
       </p>
 
       <div className="examples-grid">
+        <Link to="/examples/input-component" className="example-card">
+          <h3>Input Component</h3>
+          <p>
+            Learn why and how to create a wrapper component for use with the{' '}
+            <code>i()</code> helper.
+          </p>
+        </Link>
+
         <Link to="/examples/basic-form" className="example-card">
           <h3>Basic Form</h3>
           <p>

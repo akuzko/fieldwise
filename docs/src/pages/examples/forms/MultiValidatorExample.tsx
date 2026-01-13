@@ -1,6 +1,7 @@
 import { fieldwise, zod } from 'fieldwise';
 import { z } from 'zod';
 import { Input } from '~/components/Input';
+import { CodeBlock } from '~/components/CodeBlock';
 
 const schema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
@@ -111,6 +112,73 @@ export default function MultiValidatorExample() {
           ⏳ Checking username availability...
         </div>
       )}
+
+      <CodeBlock
+        title="Multiple Validators (Sync + Async)"
+        code={`import { fieldwise, zod } from 'fieldwise';
+import { z } from 'zod';
+
+// Zod schema for synchronous validation
+const schema = z.object({
+  username: z.string()
+    .min(3, 'Username must be at least 3 characters'),
+  email: z.email('Invalid email address')
+});
+
+// Custom async validator
+const asyncUsernameValidator = (form) => {
+  form.on('validate', async () => {
+    const values = form.getValues();
+
+    // Skip async validation if sync validation failed
+    if (form.get('username').error) return;
+
+    // Simulate API call to check username availability
+    const available = await checkUsernameAvailability(values.username);
+
+    if (!available) {
+      form.emit('errors', {
+        username: 'Username is already taken'
+      });
+    }
+  });
+};
+
+// Create form with multiple validators
+const { useForm } = fieldwise({
+  username: '',
+  email: ''
+})
+  .use(zod(schema))              // Sync validation
+  .use(asyncUsernameValidator)   // Async validation
+  .hooks();
+
+function MultiValidatorExample() {
+  const { fields, i, emit, once } = useForm();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    emit.later('validate');
+    once('validated', ({ values, errors }) => {
+      if (errors) {
+        emit('errors', errors);
+      } else {
+        console.log('All validations passed:', values);
+      }
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <Input {...i('username')} placeholder="Username" />
+      <Input {...i('email')} placeholder="Email" />
+
+      <button type="submit">Submit</button>
+    </form>
+  );
+}`}
+      />
     </div>
   );
 }

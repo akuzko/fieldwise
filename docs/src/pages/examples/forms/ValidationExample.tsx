@@ -1,6 +1,7 @@
 import { fieldwise, zod } from 'fieldwise';
 import { z } from 'zod';
 import { Input } from '~/components/Input';
+import { CodeBlock } from '~/components/CodeBlock';
 
 const schema = z
   .object({
@@ -95,6 +96,67 @@ export default function ValidationExample() {
           {isValidating ? 'Validating...' : 'Submit'}
         </button>
       </form>
+
+      <CodeBlock
+        title="Zod Schema Validation"
+        code={`import { fieldwise, zod } from 'fieldwise';
+import { z } from 'zod';
+
+// Define validation schema
+const schema = z.object({
+  username: z.string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be less than 20 characters'),
+  email: z.email('Invalid email address'),
+  age: z.coerce.number()
+    .min(18, 'Must be at least 18 years old')
+    .max(120, 'Must be less than 120 years old')
+}).refine(
+  (data) => data.password === data.confirmPassword,
+  { message: 'Passwords must match', path: ['confirmPassword'] }
+);
+
+// Create form with validation plugin
+const { useForm } = fieldwise({
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+})
+  .use(zod(schema))
+  .hooks();
+
+function ValidationExample() {
+  const { fields, i, emit, once } = useForm();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Defer validation to ensure handler is registered
+    emit.later('validate');
+
+    // Listen for validation result
+    once('validated', ({ values, errors }) => {
+      if (errors) {
+        // Set errors on form fields
+        emit('errors', errors);
+      } else {
+        // Validation passed, submit form
+        console.log('Submitting:', values);
+      }
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <Input {...i('username')} placeholder="Username" />
+      <Input {...i('email')} placeholder="Email" />
+
+      <button type="submit">Submit</button>
+    </form>
+  );
+}`}
+      />
     </div>
   );
 }

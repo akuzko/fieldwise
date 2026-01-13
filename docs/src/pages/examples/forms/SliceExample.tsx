@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { fieldwise } from 'fieldwise';
 import { Input } from '~/components/Input';
+import { CodeBlock } from '~/components/CodeBlock';
 
 const { useForm, useSlice } = fieldwise({
   firstName: '',
@@ -80,6 +81,49 @@ export default function SliceExample() {
       <ContactFields />
 
       <ResetButton />
+
+      <CodeBlock
+        title="Fine-grained Subscriptions with useSlice()"
+        code={`// Create form hooks
+const { useForm, useSlice } = fieldwise({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: ''
+}).hooks();
+
+// Component only subscribes to name fields
+function NameFields() {
+  const { fields, i } = useSlice(['firstName', 'lastName']);
+
+  return (
+    <div>
+      <Input {...i('firstName')} />
+      <Input {...i('lastName')} />
+      {/* Only re-renders when firstName or lastName change */}
+    </div>
+  );
+}
+
+// Component only subscribes to contact fields
+function ContactFields() {
+  const { fields, i } = useSlice(['email', 'phone']);
+
+  return (
+    <div>
+      <Input {...i('email')} />
+      <Input {...i('phone')} />
+      {/* Only re-renders when email or phone change */}
+    </div>
+  );
+}
+
+// Reset button needs access to emit only
+function ResetButton() {
+  const { emit } = useForm();
+  return <button onClick={() => emit('reset')}>Reset</button>;
+}`}
+      />
     </div>
   );
 }

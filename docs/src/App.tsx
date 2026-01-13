@@ -7,6 +7,7 @@ import BasicFormExample from './pages/examples/BasicFormExample';
 import SliceExample from './pages/examples/SliceExample';
 import ValidationExample from './pages/examples/ValidationExample';
 import MultiValidatorExample from './pages/examples/MultiValidatorExample';
+import InputComponent from './pages/examples/InputComponent';
 import './App.css';
 
 function Sidebar() {
@@ -34,6 +35,9 @@ function Sidebar() {
           </button>
           {examplesOpen && (
             <ul className="nav-sublist">
+              <li>
+                <Link to="/examples/input-component">Input Component</Link>
+              </li>
               <li>
                 <Link to="/examples/basic-form">Basic Form</Link>
               </li>
@@ -77,6 +81,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/getting-started" element={<GettingStarted />} />
             <Route path="/examples" element={<Examples />} />
+            <Route
+              path="/examples/input-component"
+              element={<InputComponent />}
+            />
             <Route path="/examples/basic-form" element={<BasicFormExample />} />
             <Route
               path="/examples/fine-grained-subscriptions"
