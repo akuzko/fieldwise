@@ -34,7 +34,8 @@ type EventMap<T> = {
   touch: [key: keyof T];
   touchMany: [keys: (keyof T)[]];
   validate: [];
-  validated: [result: ValidationResult<T>];
+  validated: [values: T, errors: Record<keyof T, string | null> | null];
+  validationStart: [];
   reset: [snapshot?: T];
 };
 ```
@@ -82,11 +83,12 @@ export { useForm as useUserForm, useSlice as useUserSlice };
 Both hooks return the same interface:
 
 ```typescript
-const { emit, once, isTouched, i, fields } = useUserForm();
+const { emit, once, isTouched, isValidating, i, fields } = useUserForm();
 
 // emit: EmitFn - trigger events
 // once: OneTimeFn - single-use event handler
 // isTouched: boolean - any field modified
+// isValidating: boolean - async validation in progress
 // i: InputHelper - bind inputs
 // fields: FieldSet - { name: { value, error }, email: { value, error } }
 ```
@@ -117,7 +119,7 @@ The canonical pattern for form submission with validation:
 const handleSubmit = () => {
   emit.later('validate');
 
-  once('validated', ({ values, errors }) => {
+  once('validated', (values, errors) => {
     if (errors) return emit('errors', errors);
 
     // Proceed with submission
@@ -199,7 +201,7 @@ Plugins are functions that receive the Form instance and can:
 **Primary validation plugin** using Zod schemas:
 
 ```typescript
-import { validateZodSchema } from 'fieldwise';
+import { zod } from 'fieldwise';
 import { z } from 'zod';
 
 const schema = z
@@ -212,19 +214,20 @@ const schema = z
     path: ['confirmPassword']
   });
 
-fieldwise(emptyForm).use(validateZodSchema(schema));
+fieldwise(emptyForm).use(zod(schema));
 ```
 
 **Features**:
 
+- Uses `registerValidator` API for seamless multi-validator support
 - Handles schema refinements with custom paths
 - Returns errors as strings (can be integrated with i18n libraries if needed)
 - Supports `z.coerce` for HTML input type coercion
 
 **Implementation notes**:
 
-- Listens to `validate` event
-- Emits `validated` event with `{ values, errors }`
+- Returns errors object or null from validator function
+- Runs synchronously (unless schema has async refinements)
 - Error format: `{ field: 'error' }` as `Record<keyof T, string | null>`
 
 ### logFormEvents Plugin
@@ -247,11 +250,56 @@ const myPlugin = (form) => {
     // Custom logic on field change
   });
 
-  form.on('validate', () => {
+  form.registerValidator((values) => {
     // Custom validation logic
-    form.emit('validated', { values: form.getValues(), errors: null });
+    if (!values.email) return { email: 'Required' };
+    return null;
   });
 };
+```
+
+### Validation System
+
+Fieldwise uses a `registerValidator` API for all validation:
+
+**Validator Function Signature:**
+
+```typescript
+type Validator<T> = (values: T) => Errors<T> | null | Promise<Errors<T> | null>;
+```
+
+**Validation Flow:**
+
+1. When `emit('validate')` is called, Form emits `validationStart`
+2. All sync validators run sequentially
+3. If sync validators return errors, async validators are skipped
+4. If no sync errors, all async validators run in parallel
+5. Results are merged and Form emits `validated` event
+6. Form sets `isValidating` to false
+
+**Example with multiple validators:**
+
+```typescript
+const syncValidator = (form) => {
+  form.registerValidator((values) => {
+    // Sync validation
+    return values.email ? null : { email: 'Required' };
+  });
+};
+
+const asyncValidator = (form) => {
+  form.registerValidator(async (values) => {
+    // Async validation (only runs if sync passes)
+    const available = await checkAvailability(values.email);
+    return available ? null : { email: 'Already taken' };
+  });
+};
+
+fieldwise(initial)
+  .use(zod(schema)) // Sync validator 1
+  .use(syncValidator) // Sync validator 2
+  .use(asyncValidator) // Async validator (skipped if sync errors)
+  .hooks();
 ```
 
 ## TypeScript Patterns
@@ -361,13 +409,6 @@ Dependencies:
 
 - `zod` (peer dependency)
 
-Behavior:
-
-- Listens to `validate` event
-- Runs `schema.safeParse(values)`
-- Returns error messages as-is from Zod
-- Emits `validated` with `{ values, errors }`
-
 ## Design Constraints & Requirements
 
 ### Peer Dependencies
@@ -412,7 +453,7 @@ const { register, handleSubmit } = useForm();
 const { i, emit, once } = useUserForm();
 const handleSubmit = () => {
   emit.later('validate');
-  once('validated', ({ values, errors }) => {
+  once('validated', (values, errors) => {
     if (errors) return;
     onSubmit(values);
   });
@@ -453,23 +494,6 @@ const CustomInput = ({ name, value, onChange, error }) => (
 <CustomInput {...i('email')} />;
 ```
 
-### Async Validation
-
-```typescript
-const asyncValidation = (form) => {
-  form.on('validate', async () => {
-    const values = form.getValues();
-
-    // Check username availability
-    const available = await checkUsername(values.username);
-
-    const errors = available ? null : { username: 'Username taken' };
-
-    form.emit('validated', { values, errors });
-  });
-};
-```
-
 ### Conditional Fields
 
 ```typescript
@@ -506,15 +530,17 @@ describe('UserForm', () => {
 
   it('validates required fields', () => {
     const form = new Form({ name: '' });
-    form.use(validateZodSchema(z.object({ name: z.string().min(1) })));
+    form.registerValidator((values) => {
+      return values.name ? null : { name: 'Required' };
+    });
 
-    let result;
-    form.once('validated', (r) => {
-      result = r;
+    let errors;
+    form.once('validated', (values, errs) => {
+      errors = errs;
     });
     form.emit('validate');
 
-    expect(result.errors).toHaveProperty('name');
+    expect(errors).toHaveProperty('name');
   });
 });
 ```
@@ -554,7 +580,7 @@ const formik = useFormik({
 const { fields, emit, once, i } = useForm();
 const handleSubmit = () => {
   emit.later('validate');
-  once('validated', ({ values, errors }) => {
+  once('validated', (values, errors) => {
     if (!errors) onSubmit(values);
   });
 };

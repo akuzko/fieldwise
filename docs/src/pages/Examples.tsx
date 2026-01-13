@@ -18,17 +18,17 @@ export default function Examples() {
       </section>
 
       <section className="example-section">
-        <h2>Form Validation</h2>
-        <p>Form with Zod schema validation and error display.</p>
-        <ValidationExample />
-      </section>
-
-      <section className="example-section">
         <h2>Fine-grained Subscriptions</h2>
         <p>
           Using <code>useSlice()</code> to subscribe to specific fields only.
         </p>
         <SliceExample />
+      </section>
+
+      <section className="example-section">
+        <h2>Form Validation</h2>
+        <p>Form with Zod schema validation and error display.</p>
+        <ValidationExample />
       </section>
 
       <section className="example-section">

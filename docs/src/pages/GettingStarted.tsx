@@ -16,13 +16,13 @@ export default function GettingStarted() {
           Create your form hooks using the <code>fieldwise</code> builder:
         </p>
         <pre>
-          <code>{`import { fieldwise, validateZodSchema } from 'fieldwise';
+          <code>{`import { fieldwise, zod } from 'fieldwise';
 import { z } from 'zod';
 
 // Define your schema
 const userSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address')
+  email: z.email('Invalid email address')
 });
 
 type UserFormValues = z.infer<typeof userSchema>;
@@ -31,7 +31,7 @@ const emptyUser: UserFormValues = { name: '', email: '' };
 
 // Create form hooks
 const { useForm, useSlice } = fieldwise(emptyUser)
-  .use(validateZodSchema(userSchema))
+  .use(zod(userSchema))
   .hooks();
 
 export { useForm as useUserForm, useSlice as useUserSlice };`}</code>
@@ -44,13 +44,13 @@ export { useForm as useUserForm, useSlice as useUserSlice };`}</code>
           <code>{`import { useUserForm } from './forms';
 
 function UserForm() {
-  const { fields, emit, once, i } = useUserForm();
+  const { fields, emit, once, i, isValidating } = useUserForm();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     emit.later('validate');
-    once('validated', ({ values, errors }) => {
+    once('validated', (values, errors) => {
       if (errors) return;
       console.log('Form submitted:', values);
     });
@@ -59,14 +59,16 @@ function UserForm() {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <input {...i('name')} placeholder="Name" />
+        <Input {...i('name')} placeholder="Name" />
         {fields.name.error && <span>{fields.name.error}</span>}
       </div>
       <div>
-        <input {...i('email')} placeholder="Email" />
+        <Input {...i('email')} placeholder="Email" />
         {fields.email.error && <span>{fields.email.error}</span>}
       </div>
-      <button type="submit">Submit</button>
+      <button type="submit" disabled={isValidating}>
+        {isValidating ? 'Validating...' : 'Submit'}
+      </button>
     </form>
   );
 }`}</code>

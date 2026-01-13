@@ -11,12 +11,12 @@ Fieldwise is a lightweight, event-driven form library that provides precise cont
 
 ## Features
 
-- ✨ **Fine-grained reactivity** - Subscribe to specific fields, not entire form state
-- 🎯 **Type-safe** - Full TypeScript support with type inference
-- 🪶 **Lightweight** - Event-driven architecture with no state in React components
-- 🔌 **Plugin system** - Extensible with custom validation and behavior
-- ⚡ **Performance** - Automatic microtask batching for synchronous updates
-- 🛡️ **Zod validation** - Built-in Zod schema validation
+- **Fine-grained reactivity** - Subscribe to specific fields, not entire form state
+- **Type-safe** - Full TypeScript support with type inference
+- **Lightweight** - Event-driven architecture with no state in React components
+- **Plugin system** - Extensible with custom validation and behavior
+- **Performance** - Automatic microtask batching for synchronous updates
+- **Zod validation** - Built-in Zod schema validation
 
 ## Installation
 
@@ -66,13 +66,13 @@ import Input from 'components/Input';
 // and `error`.
 
 function UserForm() {
-  const { emit, once, i } = useUserForm();
+  const { emit, once, i, isValidating } = useUserForm();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     emit.later('validate'); // Defer validation to microtask
-    once('validated', ({ values, errors }) => {
+    once('validated', (values, errors) => {
       if (errors) return emit('errors', errors); // Validation failed, assign input errors
 
       // Submit the form
@@ -85,7 +85,9 @@ function UserForm() {
       <Input {...i('name')} placeholder="Name" />
       <Input {...i('email')} type="email" placeholder="Email" />
 
-      <button type="submit">Submit</button>
+      <button type="submit" disabled={isValidating}>
+        {isValidating ? 'Validating...' : 'Submit'}
+      </button>
     </form>
   );
 }
@@ -119,7 +121,7 @@ emit('change', 'name', 'John Doe');
 emit.later('validate');
 
 // Listen for validation results (one-time)
-once('validated', ({ values, errors }) => {
+once('validated', (values, errors) => {
   // Handle result
 });
 
@@ -180,6 +182,7 @@ Hook that subscribes to all form fields.
 - `emit: EmitFn` - Function to trigger events
 - `once: OneTimeFn` - Function to listen to events once
 - `isTouched: boolean` - Whether any field has been modified
+- `isValidating: boolean` - Whether async validation is currently running
 - `i: InputHelper` - Function to generate input props
 
 ### `useSlice(keys)`
@@ -200,7 +203,7 @@ Available events:
 - `touch` - Mark field as touched: `emit('touch', key)`
 - `touchMany` - Mark multiple fields as touched: `emit('touchMany', [key1, key2])`
 - `validate` - Validation requested: `emit('validate')`
-- `validated` - Validation completed: `once('validated', ({ values, errors }) => {})`
+- `validated` - Validation completed: `once('validated', (values, errors) => {})`
 - `reset` - Form reset: `emit('reset', snapshot?)`
 
 ## Validation
@@ -236,20 +239,56 @@ The validation plugin:
 
 ### Custom Validation Plugin
 
+Create custom validators using `registerValidator`:
+
 ```typescript
 const customValidation = (form) => {
-  form.on('validate', async () => {
-    const values = form.getValues();
-
+  form.registerValidator(async (values) => {
     // Your validation logic
     const errors = await validateAsync(values);
 
-    form.emit('validated', { values, errors });
+    // Return errors object or null
+    return errors;
   });
 };
 
 fieldwise(initialValues).use(customValidation).hooks();
 ```
+
+### Multiple Validators
+
+Fieldwise supports multiple validators that run in sequence:
+
+```typescript
+const syncValidator = (form) => {
+  form.registerValidator((values) => {
+    // Sync validation (runs first)
+    if (!values.email) return { email: 'Required' };
+    return null;
+  });
+};
+
+const asyncValidator = (form) => {
+  form.registerValidator(async (values) => {
+    // Async validation (only runs if sync validation passes)
+    const available = await checkEmailAvailability(values.email);
+    return available ? null : { email: 'Email already taken' };
+  });
+};
+
+fieldwise(initialValues)
+  .use(zod(schema)) // Validator 1: Zod schema (sync)
+  .use(syncValidator) // Validator 2: Custom sync
+  .use(asyncValidator) // Validator 3: Async (skipped if errors exist)
+  .hooks();
+```
+
+**Validation flow:**
+
+1. All sync validators run sequentially
+2. If any sync validator returns errors, async validators are skipped
+3. If no sync errors, all async validators run in parallel
+4. Results are merged and emitted via `validated` event
 
 ## Advanced Usage
 
@@ -273,25 +312,6 @@ function RegistrationForm() {
     </form>
   );
 }
-```
-
-### Async Validation
-
-```typescript
-const asyncValidation = (form) => {
-  form.on('validate', async () => {
-    const values = form.getValues();
-
-    // Async check (e.g., username availability)
-    const isAvailable = await checkUsernameAvailability(values.username);
-
-    const errors = isAvailable
-      ? null
-      : { username: 'Username is already taken' };
-
-    form.emit('validated', { values, errors });
-  });
-};
 ```
 
 ### Debug Mode
@@ -367,10 +387,34 @@ Use `emit.later()` to defer validation to the microtask queue:
 const handleSubmit = () => {
   emit.later('validate'); // Defers to microtask
 
-  once('validated', ({ values, errors }) => {
+  once('validated', (values, errors) => {
     // Runs after all synchronous updates complete
   });
 };
+```
+
+### isValidating State
+
+The `isValidating` flag helps provide feedback during async validation:
+
+```typescript
+const { isValidating, emit, once, i } = useForm();
+
+const handleSubmit = () => {
+  emit.later('validate');
+  once('validated', (values, errors) => {
+    if (!errors) submitForm(values);
+  });
+};
+
+return (
+  <form>
+    <Input {...i('email')} />
+    <button disabled={isValidating}>
+      {isValidating ? 'Validating...' : 'Submit'}
+    </button>
+  </form>
+);
 ```
 
 ## TypeScript Support
@@ -417,7 +461,7 @@ const formik = useFormik({
 const { fields, emit, once, i } = useForm();
 const handleSubmit = () => {
   emit.later('validate');
-  once('validated', ({ values, errors }) => {
+  once('validated', (values, errors) => {
     if (!errors) onSubmit(values);
   });
 };
@@ -449,11 +493,10 @@ const myPlugin = (form) => {
     console.log(`${key} changed to ${value}`);
   });
 
-  // Emit events
-  form.on('validate', () => {
-    const values = form.getValues();
+  // Add custom validation
+  form.registerValidator((values) => {
     // Custom validation logic
-    form.emit('validated', { values, errors: null });
+    return null; // or errors object
   });
 };
 
