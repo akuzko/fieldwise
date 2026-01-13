@@ -1,6 +1,6 @@
 import { fieldwise, zod } from 'fieldwise';
 import { z } from 'zod';
-import { Input } from './components/Input';
+import { Input } from '~/components/Input';
 
 const schema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),

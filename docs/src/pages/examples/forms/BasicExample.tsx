@@ -1,5 +1,5 @@
 import { fieldwise } from 'fieldwise';
-import { Input } from './components/Input';
+import { Input } from '~/components/Input';
 
 const { useForm } = fieldwise({ name: '', email: '' }).hooks();
 

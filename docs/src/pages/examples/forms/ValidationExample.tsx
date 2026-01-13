@@ -1,6 +1,6 @@
 import { fieldwise, zod } from 'fieldwise';
 import { z } from 'zod';
-import { Input } from './components/Input';
+import { Input } from '~/components/Input';
 
 const schema = z
   .object({

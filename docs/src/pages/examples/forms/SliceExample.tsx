@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { fieldwise } from 'fieldwise';
-import { Input } from './components/Input';
+import { Input } from '~/components/Input';
 
 const { useForm, useSlice } = fieldwise({
   firstName: '',

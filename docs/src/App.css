@@ -47,6 +47,47 @@
   color: var(--primary);
 }
 
+.nav-group {
+  margin-bottom: 0.5rem;
+}
+
+.nav-group-toggle {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-group-toggle:hover {
+  background: var(--bg);
+  color: var(--primary);
+}
+
+.nav-sublist {
+  list-style: none;
+  margin-top: 0.25rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border);
+}
+
+.nav-sublist li {
+  margin-bottom: 0.25rem;
+}
+
+.nav-sublist a {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
 .github-link {
   margin-top: 2rem;
   padding-top: 2rem;
@@ -155,6 +196,10 @@ section p {
   border-radius: 8px;
   padding: 2rem;
   margin-top: 1rem;
+}
+
+.example p {
+  margin-bottom: 1.25rem;
 }
 
 .form-group {
@@ -273,4 +318,77 @@ button[type='button']:hover {
 
 .field-values small {
   color: var(--text-light);
+}
+
+.examples-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.example-card {
+  display: block;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.example-card:hover {
+  border-color: var(--primary);
+  background: var(--bg-alt);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.example-card h3 {
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+}
+
+.example-card p {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.example-notes {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.example-notes h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+}
+
+.example-notes h3:first-child {
+  margin-top: 0;
+}
+
+.example-notes ul,
+.example-notes ol {
+  margin-left: 1.5rem;
+  line-height: 1.8;
+}
+
+.example-notes li {
+  margin-bottom: 0.5rem;
+  color: var(--text-light);
+}
+
+.example-notes li strong {
+  color: var(--text);
+}
+
+.example-notes p {
+  color: var(--text-light);
+  line-height: 1.6;
 }

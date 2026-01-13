@@ -16,7 +16,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "fieldwise": ["../src/index.ts"]
+      "fieldwise": ["../src/index.ts"],
+      "~/*": ["./src/*"]
     }
   },
   "include": ["src"],

@@ -1,41 +1,42 @@
-import BasicExample from '../examples/BasicExample';
-import SliceExample from '../examples/SliceExample';
-import ValidationExample from '../examples/ValidationExample';
-import MultiValidatorExample from '../examples/MultiValidatorExample';
+import { Link } from 'react-router-dom';
 
 export default function Examples() {
   return (
     <div className="page">
       <h1>Examples</h1>
-      <p>Interactive examples demonstrating Fieldwise features.</p>
+      <p>
+        Interactive examples demonstrating Fieldwise features. Select an example
+        from the sidebar to see it in action.
+      </p>
 
-      <section className="example-section">
-        <h2>Basic Form</h2>
-        <p>
-          Simple form with field binding using the <code>i()</code> helper.
-        </p>
-        <BasicExample />
-      </section>
+      <div className="examples-grid">
+        <Link to="/examples/basic-form" className="example-card">
+          <h3>Basic Form</h3>
+          <p>
+            Simple form with field binding using the <code>i()</code> helper.
+          </p>
+        </Link>
 
-      <section className="example-section">
-        <h2>Fine-grained Subscriptions</h2>
-        <p>
-          Using <code>useSlice()</code> to subscribe to specific fields only.
-        </p>
-        <SliceExample />
-      </section>
+        <Link
+          to="/examples/fine-grained-subscriptions"
+          className="example-card"
+        >
+          <h3>Fine-grained Subscriptions</h3>
+          <p>
+            Using <code>useSlice()</code> to subscribe to specific fields only.
+          </p>
+        </Link>
 
-      <section className="example-section">
-        <h2>Form Validation</h2>
-        <p>Form with Zod schema validation and error display.</p>
-        <ValidationExample />
-      </section>
+        <Link to="/examples/validation" className="example-card">
+          <h3>Form Validation</h3>
+          <p>Form with Zod schema validation and error display.</p>
+        </Link>
 
-      <section className="example-section">
-        <h2>Multiple Validators</h2>
-        <p>Form with multiple validators applied to fields.</p>
-        <MultiValidatorExample />
-      </section>
+        <Link to="/examples/multiple-validators" className="example-card">
+          <h3>Multiple Validators</h3>
+          <p>Form with multiple validators applied to fields.</p>
+        </Link>
+      </div>
     </div>
   );
 }
