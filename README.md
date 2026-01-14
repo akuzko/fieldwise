@@ -4,6 +4,7 @@
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/fieldwise)](https://bundlephobia.com/package/fieldwise)
 [![codecov](https://codecov.io/gh/akuzko/fieldwise/branch/main/graph/badge.svg)](https://codecov.io/gh/akuzko/fieldwise)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-fieldwise.dev-blue)](https://fieldwise.dev)
 
 **Type-safe, reactive form management for React with fine-grained field subscriptions.**
 
@@ -307,13 +308,13 @@ function RegistrationForm() {
   // Show/hide based on field value
   return (
     <form>
-      <select {...i('accountType')}>
+      <Select {...i('accountType')}>
         <option value="personal">Personal</option>
         <option value="business">Business</option>
       </select>
 
       {fields.accountType.value === 'business' && (
-        <input {...i('companyName')} placeholder="Company Name" />
+        <Input {...i('companyName')} placeholder="Company Name" />
       )}
     </form>
   );

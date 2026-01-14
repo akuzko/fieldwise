@@ -113,7 +113,7 @@ const schema = z.object({
     .max(120, 'Must be less than 120 years old')
 }).refine(
   (data) => data.password === data.confirmPassword,
-  { message: 'Passwords must match', path: ['confirmPassword'] }
+  { error: 'Passwords must match', path: ['confirmPassword'] }
 );
 
 // Create form with validation plugin
@@ -127,23 +127,20 @@ const { useForm } = fieldwise({
   .hooks();
 
 function ValidationExample() {
-  const { fields, i, emit, once } = useForm();
+  const { i, emit, once } = useForm();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Defer validation to ensure handler is registered
     emit.later('validate');
-
     // Listen for validation result
-    once('validated', ({ values, errors }) => {
-      if (errors) {
-        // Set errors on form fields
-        emit('errors', errors);
-      } else {
-        // Validation passed, submit form
-        console.log('Submitting:', values);
-      }
+    once('validated', (values, errors) => {
+      // Set errors on form fields if any
+      if (errors) return emit('errors', errors);
+
+      // Validation passed, submit form
+      console.log('Submitting:', values);
     });
   };
 
@@ -151,6 +148,8 @@ function ValidationExample() {
     <form onSubmit={handleSubmit}>
       <Input {...i('username')} placeholder="Username" />
       <Input {...i('email')} placeholder="Email" />
+      <Input {...i('password')} type="password" placeholder="Password" />
+      <Input {...i('confirmPassword')} type="password" placeholder="Confirm Password" />
 
       <button type="submit">Submit</button>
     </form>

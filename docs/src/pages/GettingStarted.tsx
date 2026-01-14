@@ -1,3 +1,5 @@
+import { CodeBlock } from '~/components/CodeBlock';
+
 export default function GettingStarted() {
   return (
     <div className="page">
@@ -15,8 +17,10 @@ export default function GettingStarted() {
         <p>
           Create your form hooks using the <code>fieldwise</code> builder:
         </p>
-        <pre>
-          <code>{`import { fieldwise, zod } from 'fieldwise';
+        <CodeBlock
+          defaultExpanded
+          title="forms/user.ts"
+          code={`import { fieldwise, zod } from 'fieldwise';
 import { z } from 'zod';
 
 // Define your schema
@@ -34,45 +38,43 @@ const { useForm, useSlice } = fieldwise(emptyUser)
   .use(zod(userSchema))
   .hooks();
 
-export { useForm as useUserForm, useSlice as useUserSlice };`}</code>
-        </pre>
+export { useForm as useUserForm, useSlice as useUserSlice };`}
+        />
       </section>
 
       <section>
         <h2>Use in Components</h2>
-        <pre>
-          <code>{`import { useUserForm } from './forms';
+        <CodeBlock
+          defaultExpanded
+          title="components/UserForm.tsx"
+          code={`import { useUserForm } from './forms';
 
 function UserForm() {
-  const { fields, emit, once, i, isValidating } = useUserForm();
+  const { emit, once, i, isValidating } = useUserForm();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     emit.later('validate');
     once('validated', (values, errors) => {
-      if (errors) return;
+      if (errors) return emit('errors', errors);
+
       console.log('Form submitted:', values);
     });
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div>
-        <Input {...i('name')} placeholder="Name" />
-        {fields.name.error && <span>{fields.name.error}</span>}
-      </div>
-      <div>
-        <Input {...i('email')} placeholder="Email" />
-        {fields.email.error && <span>{fields.email.error}</span>}
-      </div>
+      <Input {...i('name')} placeholder="Name" />
+      <Input {...i('email')} placeholder="Email" />
+
       <button type="submit" disabled={isValidating}>
         {isValidating ? 'Validating...' : 'Submit'}
       </button>
     </form>
   );
-}`}</code>
-        </pre>
+}`}
+        />
       </section>
 
       <section>

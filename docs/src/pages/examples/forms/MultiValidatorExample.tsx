@@ -125,23 +125,31 @@ const schema = z.object({
   email: z.email('Invalid email address')
 });
 
-// Custom async validator
-const asyncUsernameValidator = (form) => {
-  form.on('validate', async () => {
-    const values = form.getValues();
+// Simulate async username availability check
+const checkUsernameAvailability = async (
+  username: string
+): Promise<boolean> => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  // Simulate that "admin" and "test" are taken
+  return username !== 'admin' && username !== 'test';
+};
 
-    // Skip async validation if sync validation failed
-    if (form.get('username').error) return;
+// Custom async validator plugin
+const asyncUsernameValidator = (form: any) => {
+  form.registerValidator(
+    async (values: { username: string }, syncErrors?: any) => {
+      // Skip expensive server check if sync validation already failed
+      if (syncErrors?.username) return null;
 
-    // Simulate API call to check username availability
-    const available = await checkUsernameAvailability(values.username);
+      const available = await checkUsernameAvailability(values.username);
 
-    if (!available) {
-      form.emit('errors', {
-        username: 'Username is already taken'
-      });
+      if (!available) {
+        return { username: 'Username is already taken' };
+      }
+
+      return null;
     }
-  });
+  );
 };
 
 // Create form with multiple validators
@@ -154,18 +162,16 @@ const { useForm } = fieldwise({
   .hooks();
 
 function MultiValidatorExample() {
-  const { fields, i, emit, once } = useForm();
+  const { i, emit, once } = useForm();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     emit.later('validate');
-    once('validated', ({ values, errors }) => {
-      if (errors) {
-        emit('errors', errors);
-      } else {
-        console.log('All validations passed:', values);
-      }
+    once('validated', (values, errors) => {
+      if (errors) return emit('errors', errors);
+
+      console.log('All validations passed:', values);
     });
   };
 
