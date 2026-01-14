@@ -488,6 +488,63 @@ const { i, emit, once, fields } = useForm();
 // Errors available at fields.fieldName.error
 ```
 
+## Limitations & Design Decisions
+
+### Multiple Forms
+
+Each `fieldwise()` call creates hooks for a single form instance. To use multiple forms on the same page, create separate hook sets:
+
+```typescript
+// Separate forms with different hook names
+const { useForm: useUserForm } = fieldwise(userDefaults).hooks();
+const { useForm: useCheckoutForm } = fieldwise(checkoutDefaults).hooks();
+
+function MyComponent() {
+  const userForm = useUserForm();
+  const checkoutForm = useCheckoutForm();
+  // Each form operates independently
+}
+```
+
+This is intentional - it provides clear separation and follows patterns from other form libraries (React Hook Form, Formik).
+
+### Nested Data Structures
+
+**Current Limitation:** Fieldwise currently supports flat form structures only. Nested objects are not supported:
+
+```typescript
+// ❌ Not currently supported
+const form = fieldwise({
+  user: {
+    name: '',
+    address: {
+      street: '',
+      city: ''
+    }
+  }
+});
+
+// ✅ Current workaround - flatten the structure
+const form = fieldwise({
+  userName: '',
+  userAddressStreet: '',
+  userAddressCity: ''
+});
+```
+
+**Roadmap:** Support for nested data structures is planned for a future release (likely 1.1 or 1.2). This will include:
+
+- Dot notation for nested field paths (`user.address.street`)
+- Type-safe nested field subscriptions
+- Validation path mapping for nested schemas
+- Nested field grouping in `useSlice()`
+
+For now, if you need complex nested structures, consider:
+
+1. Flattening your form data
+2. Using separate forms for nested sections
+3. Transforming data shape on submit
+
 ## Plugin Development
 
 Create custom plugins to extend Fieldwise:
