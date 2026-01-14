@@ -1,6 +1,6 @@
 {
   "name": "fieldwise",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Type-safe, reactive form management for React with fine-grained field subscriptions",
   "repository": {
     "type": "git",
