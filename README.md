@@ -16,7 +16,7 @@ Fieldwise is a lightweight, event-driven form library that provides precise cont
 - **Type-safe** - Full TypeScript support with type inference
 - **Lightweight** - Event-driven architecture with no state in React components
 - **Plugin system** - Extensible with custom validation and behavior
-- **Performance** - Automatic microtask batching for synchronous updates
+- **Performance** - Fine-grained subscriptions prevent unnecessary re-renders
 - **Zod validation** - Built-in Zod schema validation
 
 ## Installation
@@ -72,7 +72,7 @@ function UserForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    emit.later('validate'); // Defer validation to microtask
+    emit.later('validate'); // Defer validation to next event loop
     once('validated', (values, errors) => {
       if (errors) return emit('errors', errors); // Validation failed, assign input errors
 
@@ -376,26 +376,26 @@ const { fields } = useUserForm();
 const { fields } = useUserSlice(['email', 'password']);
 ```
 
-### Microtask Batching
+### Synchronous Updates
 
-Fieldwise automatically batches synchronous updates:
+Fieldwise updates React state synchronously when field values change. This ensures controlled inputs maintain cursor position during editing:
 
 ```typescript
 emit('change', 'name', 'John');
 emit('change', 'email', 'john@example.com');
-// Both updates trigger only ONE re-render
+// Each update triggers its own re-render for proper input control
 ```
 
 ### Validation Deferral
 
-Use `emit.later()` to defer validation to the microtask queue:
+Use `emit.later()` to defer validation to the next event loop:
 
 ```typescript
 const handleSubmit = () => {
-  emit.later('validate'); // Defers to microtask
+  emit.later('validate'); // Defers to next event loop
 
   once('validated', (values, errors) => {
-    // Runs after all synchronous updates complete
+    // Validation completes after current execution context
   });
 };
 ```

@@ -203,7 +203,7 @@ describe('fieldwise', () => {
   });
 
   describe('emit.later', () => {
-    it('should defer event to microtask', async () => {
+    it('should defer event to next event loop', async () => {
       const { useForm } = fieldwise({ name: '' }).hooks();
       const { result } = renderHook(() => useForm());
       let validationRan = false;

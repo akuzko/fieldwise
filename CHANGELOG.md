@@ -10,14 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Core Form Class** with event-driven architecture
-
   - Fine-grained field subscriptions for optimal performance
   - Event system supporting `change`, `changeMany`, `touch`, `touchMany`, `validate`, `validated`, `reset`
   - Subscription-based reactivity - no React state in Form class
   - Automatic cleanup on component unmount
 
 - **React Integration**
-
   - `fieldwise()` builder pattern for creating form hooks
   - `useForm()` hook - subscribe to all fields
   - `useSlice(keys)` hook - subscribe to specific fields only
@@ -25,7 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Type-safe API with full TypeScript inference
 
 - **Validation System**
-
   - Plugin-based validation architecture with `registerValidator` API
   - Support for multiple validators (sync and async)
   - Parallel async validation execution
@@ -35,14 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `isValidating` flag for async validation states
 
 - **Plugin System**
-
   - Extensible architecture for custom behavior
   - `zod()` plugin for Zod schema validation
   - `logFormEvents()` debug plugin with formatted console output
   - Simple plugin API - receive Form instance, listen/emit events
 
 - **Developer Experience**
-
   - 100% TypeScript with full type inference
   - Generic form values with mapped FieldSet type
   - Type-safe event handlers
@@ -51,14 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Multiple usage examples and patterns
 
 - **Performance Optimizations**
-
-  - Microtask batching for synchronous updates
+  - Synchronous state updates for proper controlled input behavior
   - No unnecessary re-renders with fine-grained subscriptions
   - Efficient subscription cleanup
   - Immutable value updates for React reconciliation
 
 - **Testing**
-
   - 100% code coverage (81 passing tests)
   - Unit tests for Form class
   - Integration tests for React hooks

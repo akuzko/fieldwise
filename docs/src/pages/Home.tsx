@@ -26,7 +26,7 @@ export default function Home() {
         </div>
         <div className="feature">
           <h3>⚡ Performance</h3>
-          <p>Automatic microtask batching for synchronous updates</p>
+          <p>Fine-grained subscriptions prevent unnecessary re-renders</p>
         </div>
         <div className="feature">
           <h3>🛡️ Zod validation</h3>
