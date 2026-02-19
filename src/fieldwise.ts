@@ -55,20 +55,13 @@ export class FormBuilder<T extends Values> {
 
       useEffect(() => {
         const unsubscribers: FieldUnsubscribeFn[] = [];
-        let pendingUpdate = false;
 
-        const scheduleUpdate = () => {
-          if (!pendingUpdate) {
-            pendingUpdate = true;
-            queueMicrotask(() => {
-              pendingUpdate = false;
-              setFields(this.form.getSlice(keys));
-            });
-          }
+        const updateFields = () => {
+          setFields(this.form.getSlice(keys));
         };
 
         keys.forEach((key) => {
-          const unsubscribe = this.form.subscribeField(key, scheduleUpdate);
+          const unsubscribe = this.form.subscribeField(key, updateFields);
           unsubscribers.push(unsubscribe);
         });
 
@@ -100,16 +93,17 @@ export class FormBuilder<T extends Values> {
 
       const inputProps = useCallback(
         <K extends keyof T>(name: K): InputProps<K, T[K]> => {
+          const field = fields[name as unknown as keyof typeof fields];
           return {
             name,
-            value: this.form.getValue(name),
+            value: field.value as unknown as T[K],
             onChange: (value: T[K]) => {
               this.form.emit('change', name, value);
             },
-            error: this.form.get(name).error
+            error: field.error
           };
         },
-        []
+        [fields]
       );
 
       return { fields, isTouched, isValidating, emit, once, i: inputProps };
