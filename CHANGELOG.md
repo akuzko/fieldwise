@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-02-19
+
+### Fixed
+
+- **Cursor position preservation in text inputs** - Removed microtask batching in favor of synchronous React state updates. Previously, the `useSlice` and `useForm` hooks queued state updates using `queueMicrotask`, which caused a delay between input change events and React state updates. This delay broke React's controlled component contract, causing the cursor to jump to the end of the input when editing text in the middle. Now updates are applied synchronously, maintaining proper cursor position during editing.
+
+### Changed
+
+- **Documentation updates** - Updated all documentation to reflect synchronous update behavior instead of microtask batching terminology.
+
 ## [1.0.0] - 2026-01-14
 
 ### Added
@@ -77,4 +87,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Field arrays not yet supported (planned for future release)
 - Workarounds available and documented for common nested use cases
 
+[1.0.1]: https://github.com/akuzko/fieldwise/releases/tag/v1.0.1
 [1.0.0]: https://github.com/akuzko/fieldwise/releases/tag/v1.0.0
